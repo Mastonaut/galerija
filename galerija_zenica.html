@@ -23,77 +23,86 @@
   }
   .grid img:hover { opacity: .78; }
 
+  /* Wrapper koji drži i grid i lightbox */
+  #wrapper {
+    position: relative;
+  }
+
   #lb {
     display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,.93);
     z-index: 9999;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
   }
   #lb.on { display: flex; }
 
   #lb-img {
-    max-width: 88vw;
-    max-height: 80vh;
+    max-width: 92%;
+    max-height: 240px;
     object-fit: contain;
     display: block;
   }
 
   #lb-x {
-    position: fixed;
-    top: 14px;
-    right: 22px;
+    position: absolute;
+    top: 10px;
+    right: 16px;
     color: #fff;
-    font-size: 44px;
+    font-size: 36px;
     cursor: pointer;
     line-height: 1;
-    opacity: .8;
-    z-index: 10001;
+    opacity: .9;
   }
   #lb-x:hover { opacity: 1; }
 
-  #lb-prev, #lb-next {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+  #lb-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 12px;
+  }
+
+  #lb-nav span {
     color: #fff;
-    font-size: 52px;
+    font-size: 36px;
     cursor: pointer;
-    padding: 10px 16px;
-    opacity: .7;
+    opacity: .75;
     user-select: none;
     line-height: 1;
+    padding: 4px 10px;
   }
-  #lb-prev:hover, #lb-next:hover { opacity: 1; }
-  #lb-prev { left: 6px; }
-  #lb-next { right: 6px; }
+  #lb-nav span:hover { opacity: 1; }
 
   #lb-cnt {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
     color: #fff;
     font-size: 13px;
     opacity: .6;
-    letter-spacing: .05em;
+    min-width: 40px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<div id="lb">
-  <span id="lb-x">&#x2715;</span>
-  <span id="lb-prev">&#10094;</span>
-  <img id="lb-img" src="" alt="">
-  <span id="lb-next">&#10095;</span>
-  <div id="lb-cnt"></div>
-</div>
+<div id="wrapper">
+  <div class="grid" id="grid"></div>
 
-<div class="grid" id="grid"></div>
+  <div id="lb">
+    <span id="lb-x">&#x2715;</span>
+    <img id="lb-img" src="" alt="">
+    <div id="lb-nav">
+      <span id="lb-prev">&#10094;</span>
+      <span id="lb-cnt">1 / 6</span>
+      <span id="lb-next">&#10095;</span>
+    </div>
+  </div>
+</div>
 
 <script>
   var base = "https://asacentral.ba/media/Poslovnica_Zenica_jun_2026/";
@@ -107,12 +116,12 @@
   ];
 
   var cur = 0;
-  var lb = document.getElementById("lb");
+  var lb    = document.getElementById("lb");
   var lbImg = document.getElementById("lb-img");
   var lbCnt = document.getElementById("lb-cnt");
+  var grid  = document.getElementById("grid");
 
-  // Gradi grid
-  var grid = document.getElementById("grid");
+  // Gradi thumbnailove
   slike.forEach(function(s, i) {
     var img = document.createElement("img");
     img.src = base + s;
@@ -120,13 +129,6 @@
     img.addEventListener("click", function() { lbOpen(i); });
     grid.appendChild(img);
   });
-
-  // Auto-visina prema gridu
-  function sendHeight() {
-    var h = document.body.scrollHeight;
-    try { window.parent.postMessage({ iframeHeight: h }, "*"); } catch(e) {}
-  }
-  window.addEventListener("load", sendHeight);
 
   function lbOpen(i) {
     cur = i;
@@ -148,10 +150,7 @@
   document.getElementById("lb-x").addEventListener("click", lbClose);
   document.getElementById("lb-prev").addEventListener("click", function() { lbNav(-1); });
   document.getElementById("lb-next").addEventListener("click", function() { lbNav(1); });
-
-  lb.addEventListener("click", function(e) {
-    if (e.target === lb) lbClose();
-  });
+  lb.addEventListener("click", function(e) { if (e.target === lb) lbClose(); });
 
   document.addEventListener("keydown", function(e) {
     if (!lb.className) return;
