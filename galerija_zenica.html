@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: transparent; font-family: sans-serif; }
+  html, body { background: transparent; font-family: sans-serif; }
 
   .grid {
     display: grid;
@@ -21,29 +21,28 @@
     display: block;
     transition: opacity .2s;
   }
-
   .grid img:hover { opacity: .78; }
 
-  /* OVERLAY */
   #lb {
     display: none;
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,.93);
     z-index: 9999;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
   }
   #lb.on { display: flex; }
 
   #lb-img {
     max-width: 88vw;
-    max-height: 84vh;
+    max-height: 80vh;
     object-fit: contain;
     display: block;
   }
 
-  #lb-close {
+  #lb-x {
     position: fixed;
     top: 14px;
     right: 22px;
@@ -52,8 +51,9 @@
     cursor: pointer;
     line-height: 1;
     opacity: .8;
+    z-index: 10001;
   }
-  #lb-close:hover { opacity: 1; }
+  #lb-x:hover { opacity: 1; }
 
   #lb-prev, #lb-next {
     position: fixed;
@@ -85,16 +85,14 @@
 </head>
 <body>
 
-<!-- LIGHTBOX -->
-<div id="lb" onclick="if(event.target===this)close()">
-  <span id="lb-close" onclick="close()">&#x2715;</span>
-  <span id="lb-prev" onclick="nav(-1)">&#10094;</span>
+<div id="lb">
+  <span id="lb-x">&#x2715;</span>
+  <span id="lb-prev">&#10094;</span>
   <img id="lb-img" src="" alt="">
-  <span id="lb-next" onclick="nav(1)">&#10095;</span>
+  <span id="lb-next">&#10095;</span>
   <div id="lb-cnt"></div>
 </div>
 
-<!-- GALERIJA -->
 <div class="grid" id="grid"></div>
 
 <script>
@@ -109,38 +107,57 @@
   ];
 
   var cur = 0;
-  var grid = document.getElementById("grid");
+  var lb = document.getElementById("lb");
+  var lbImg = document.getElementById("lb-img");
+  var lbCnt = document.getElementById("lb-cnt");
 
+  // Gradi grid
+  var grid = document.getElementById("grid");
   slike.forEach(function(s, i) {
     var img = document.createElement("img");
     img.src = base + s;
     img.alt = "Poslovnica Zenica " + (i+1);
-    img.onclick = function() { open(i); };
+    img.addEventListener("click", function() { lbOpen(i); });
     grid.appendChild(img);
   });
 
-  function open(i) {
+  // Auto-visina prema gridu
+  function sendHeight() {
+    var h = document.body.scrollHeight;
+    try { window.parent.postMessage({ iframeHeight: h }, "*"); } catch(e) {}
+  }
+  window.addEventListener("load", sendHeight);
+
+  function lbOpen(i) {
     cur = i;
-    document.getElementById("lb-img").src = base + slike[cur];
-    document.getElementById("lb-cnt").textContent = (cur+1) + " / " + slike.length;
-    document.getElementById("lb").className = "on";
+    lbImg.src = base + slike[cur];
+    lbCnt.textContent = (cur+1) + " / " + slike.length;
+    lb.className = "on";
   }
 
-  function close() {
-    document.getElementById("lb").className = "";
+  function lbClose() {
+    lb.className = "";
   }
 
-  function nav(dir) {
+  function lbNav(dir) {
     cur = (cur + dir + slike.length) % slike.length;
-    document.getElementById("lb-img").src = base + slike[cur];
-    document.getElementById("lb-cnt").textContent = (cur+1) + " / " + slike.length;
+    lbImg.src = base + slike[cur];
+    lbCnt.textContent = (cur+1) + " / " + slike.length;
   }
+
+  document.getElementById("lb-x").addEventListener("click", lbClose);
+  document.getElementById("lb-prev").addEventListener("click", function() { lbNav(-1); });
+  document.getElementById("lb-next").addEventListener("click", function() { lbNav(1); });
+
+  lb.addEventListener("click", function(e) {
+    if (e.target === lb) lbClose();
+  });
 
   document.addEventListener("keydown", function(e) {
-    if (!document.getElementById("lb").className) return;
-    if (e.key === "Escape") close();
-    if (e.key === "ArrowLeft") nav(-1);
-    if (e.key === "ArrowRight") nav(1);
+    if (!lb.className) return;
+    if (e.key === "Escape") lbClose();
+    if (e.key === "ArrowLeft") lbNav(-1);
+    if (e.key === "ArrowRight") lbNav(1);
   });
 </script>
 
