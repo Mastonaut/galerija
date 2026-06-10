@@ -21,87 +21,11 @@
     transition: opacity .2s;
   }
   .grid img:hover { opacity: .78; }
-
-  #lb {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,.95);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  #lb.on { display: flex; }
-
-  #lb-img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: contain;
-  }
-
-  #lb-x {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    color: #fff;
-    font-size: 32px;
-    cursor: pointer;
-    line-height: 1;
-    opacity: .9;
-  }
-  #lb-x:hover { opacity: 1; }
-
-  #lb-prev {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 38px;
-    cursor: pointer;
-    opacity: .8;
-    user-select: none;
-    padding: 8px;
-  }
-  #lb-next {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 38px;
-    cursor: pointer;
-    opacity: .8;
-    user-select: none;
-    padding: 8px;
-  }
-  #lb-prev:hover, #lb-next:hover { opacity: 1; }
-
-  #lb-cnt {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    font-size: 13px;
-    opacity: .6;
-  }
 </style>
 </head>
 <body>
 
 <div class="grid" id="grid"></div>
-
-<div id="lb">
-  <span id="lb-x">&#x2715;</span>
-  <span id="lb-prev">&#10094;</span>
-  <img id="lb-img" src="" alt="">
-  <span id="lb-next">&#10095;</span>
-  <div id="lb-cnt">1 / 6</div>
-</div>
 
 <script>
   var base = "https://asacentral.ba/media/Poslovnica_Zenica_jun_2026/";
@@ -114,58 +38,17 @@
     "DSC_5727.webp"
   ];
 
-  var cur = 0;
-  var lb    = document.getElementById("lb");
-  var lbImg = document.getElementById("lb-img");
-  var lbCnt = document.getElementById("lb-cnt");
-
-  // Gradi 2 thumbnailа, prirodna visina
   slike.slice(0, 2).forEach(function(s, i) {
     var img = document.createElement("img");
     img.src = base + s;
     img.alt = "Poslovnica Zenica " + (i+1);
-    img.addEventListener("click", function() { lbOpen(i); });
+    img.addEventListener("click", function() {
+      window.open(
+        "https://mastonaut.github.io/galerija/lightbox.html?i=" + i,
+        "_blank"
+      );
+    });
     document.getElementById("grid").appendChild(img);
-  });
-
-  // Nakon učitavanja svih slika, pošalji tačnu visinu parent stranici
-  window.addEventListener("load", function() {
-    var h = document.body.scrollHeight;
-    window.parent.postMessage({ iframeHeight: h }, "*");
-  });
-
-  function lbOpen(i) {
-    cur = i;
-    lbImg.src = base + slike[cur];
-    lbCnt.textContent = (cur+1) + " / " + slike.length;
-    lb.className = "on";
-    // Povećaj iframe na parent stranici za lightbox
-    window.parent.postMessage({ iframeHeight: window.screen.height }, "*");
-  }
-
-  function lbClose() {
-    lb.className = "";
-    // Vrati na originalnu visinu
-    var h = document.body.scrollHeight;
-    window.parent.postMessage({ iframeHeight: h }, "*");
-  }
-
-  function lbNav(dir) {
-    cur = (cur + dir + slike.length) % slike.length;
-    lbImg.src = base + slike[cur];
-    lbCnt.textContent = (cur+1) + " / " + slike.length;
-  }
-
-  document.getElementById("lb-x").addEventListener("click", lbClose);
-  document.getElementById("lb-prev").addEventListener("click", function() { lbNav(-1); });
-  document.getElementById("lb-next").addEventListener("click", function() { lbNav(1); });
-  lb.addEventListener("click", function(e) { if (e.target === lb) lbClose(); });
-
-  document.addEventListener("keydown", function(e) {
-    if (!lb.className) return;
-    if (e.key === "Escape") lbClose();
-    if (e.key === "ArrowLeft") lbNav(-1);
-    if (e.key === "ArrowRight") lbNav(1);
   });
 </script>
 </body>
