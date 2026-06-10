@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galerija — ASA CENTRAL</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: #000;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: sans-serif;
+  }
+
+  #stage {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  #lb-img {
+    max-width: 92vw;
+    max-height: 92vh;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+  }
+
+  #lb-x {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    color: #fff;
+    font-size: 40px;
+    cursor: pointer;
+    line-height: 1;
+    opacity: .8;
+    z-index: 100;
+  }
+  #lb-x:hover { opacity: 1; }
+
+  #lb-prev {
+    position: fixed;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 52px;
+    cursor: pointer;
+    opacity: .7;
+    user-select: none;
+    padding: 10px 16px;
+  }
+  #lb-next {
+    position: fixed;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 52px;
+    cursor: pointer;
+    opacity: .7;
+    user-select: none;
+    padding: 10px 16px;
+  }
+  #lb-prev:hover, #lb-next:hover { opacity: 1; }
+
+  #lb-cnt {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 14px;
+    opacity: .55;
+    letter-spacing: .06em;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <span id="lb-x">&#x2715;</span>
+  <span id="lb-prev">&#10094;</span>
+  <img id="lb-img" src="" alt="">
+  <span id="lb-next">&#10095;</span>
+  <div id="lb-cnt"></div>
+</div>
+
+<script>
+  var base = "https://asacentral.ba/media/Poslovnica_Zenica_jun_2026/";
+  var slike = [
+    "DSC_5611_web.webp",
+    "DSC_5593_web.webp",
+    "DSC_5707_web.webp",
+    "DSC_5641_web.webp",
+    "DSC_5670_web.webp",
+    "DSC_5727.webp"
+  ];
+
+  var params = new URLSearchParams(window.location.search);
+  var cur = parseInt(params.get("i")) || 0;
+
+  var lbImg = document.getElementById("lb-img");
+  var lbCnt = document.getElementById("lb-cnt");
+
+  function show() {
+    lbImg.src = base + slike[cur];
+    lbCnt.textContent = (cur+1) + " / " + slike.length;
+  }
+
+  function nav(dir) {
+    cur = (cur + dir + slike.length) % slike.length;
+    show();
+  }
+
+  show();
+
+  document.getElementById("lb-x").addEventListener("click", function() { window.close(); });
+  document.getElementById("lb-prev").addEventListener("click", function() { nav(-1); });
+  document.getElementById("lb-next").addEventListener("click", function() { nav(1); });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") window.close();
+    if (e.key === "ArrowLeft") nav(-1);
+    if (e.key === "ArrowRight") nav(1);
+  });
+</script>
+</body>
+</html>
