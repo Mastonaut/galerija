@@ -15,15 +15,13 @@
 
   .grid img {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
-    cursor: pointer;
+    height: auto;
     display: block;
+    cursor: pointer;
     transition: opacity .2s;
   }
   .grid img:hover { opacity: .78; }
 
-  /* LIGHTBOX - fiksiran na viewport iframea */
   #lb {
     display: none;
     position: fixed;
@@ -41,7 +39,6 @@
     width: 100%;
     height: auto;
     display: block;
-    max-height: 75vh;
     object-fit: contain;
   }
 
@@ -122,7 +119,7 @@
   var lbImg = document.getElementById("lb-img");
   var lbCnt = document.getElementById("lb-cnt");
 
-  // Gradi samo 2 thumbnailа
+  // Gradi 2 thumbnailа, prirodna visina
   slike.slice(0, 2).forEach(function(s, i) {
     var img = document.createElement("img");
     img.src = base + s;
@@ -131,15 +128,26 @@
     document.getElementById("grid").appendChild(img);
   });
 
+  // Nakon učitavanja svih slika, pošalji tačnu visinu parent stranici
+  window.addEventListener("load", function() {
+    var h = document.body.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, "*");
+  });
+
   function lbOpen(i) {
     cur = i;
     lbImg.src = base + slike[cur];
     lbCnt.textContent = (cur+1) + " / " + slike.length;
     lb.className = "on";
+    // Povećaj iframe na parent stranici za lightbox
+    window.parent.postMessage({ iframeHeight: window.screen.height }, "*");
   }
 
   function lbClose() {
     lb.className = "";
+    // Vrati na originalnu visinu
+    var h = document.body.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, "*");
   }
 
   function lbNav(dir) {
