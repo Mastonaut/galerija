@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: transparent; font-family: sans-serif; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .grid img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+    transition: opacity .2s;
+  }
+
+  .grid img:hover { opacity: .78; }
+
+  /* OVERLAY */
+  #lb {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.93);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  #lb.on { display: flex; }
+
+  #lb-img {
+    max-width: 88vw;
+    max-height: 84vh;
+    object-fit: contain;
+    display: block;
+  }
+
+  #lb-close {
+    position: fixed;
+    top: 14px;
+    right: 22px;
+    color: #fff;
+    font-size: 44px;
+    cursor: pointer;
+    line-height: 1;
+    opacity: .8;
+  }
+  #lb-close:hover { opacity: 1; }
+
+  #lb-prev, #lb-next {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 52px;
+    cursor: pointer;
+    padding: 10px 16px;
+    opacity: .7;
+    user-select: none;
+    line-height: 1;
+  }
+  #lb-prev:hover, #lb-next:hover { opacity: 1; }
+  #lb-prev { left: 6px; }
+  #lb-next { right: 6px; }
+
+  #lb-cnt {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 13px;
+    opacity: .6;
+    letter-spacing: .05em;
+  }
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="if(event.target===this)close()">
+  <span id="lb-close" onclick="close()">&#x2715;</span>
+  <span id="lb-prev" onclick="nav(-1)">&#10094;</span>
+  <img id="lb-img" src="" alt="">
+  <span id="lb-next" onclick="nav(1)">&#10095;</span>
+  <div id="lb-cnt"></div>
+</div>
+
+<!-- GALERIJA -->
+<div class="grid" id="grid"></div>
+
+<script>
+  var base = "https://asacentral.ba/media/Poslovnica_Zenica_jun_2026/";
+  var slike = [
+    "DSC_5611_web.webp",
+    "DSC_5593_web.webp",
+    "DSC_5707_web.webp",
+    "DSC_5641_web.webp",
+    "DSC_5670_web.webp",
+    "DSC_5727.webp"
+  ];
+
+  var cur = 0;
+  var grid = document.getElementById("grid");
+
+  slike.forEach(function(s, i) {
+    var img = document.createElement("img");
+    img.src = base + s;
+    img.alt = "Poslovnica Zenica " + (i+1);
+    img.onclick = function() { open(i); };
+    grid.appendChild(img);
+  });
+
+  function open(i) {
+    cur = i;
+    document.getElementById("lb-img").src = base + slike[cur];
+    document.getElementById("lb-cnt").textContent = (cur+1) + " / " + slike.length;
+    document.getElementById("lb").className = "on";
+  }
+
+  function close() {
+    document.getElementById("lb").className = "";
+  }
+
+  function nav(dir) {
+    cur = (cur + dir + slike.length) % slike.length;
+    document.getElementById("lb-img").src = base + slike[cur];
+    document.getElementById("lb-cnt").textContent = (cur+1) + " / " + slike.length;
+  }
+
+  document.addEventListener("keydown", function(e) {
+    if (!document.getElementById("lb").className) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowLeft") nav(-1);
+    if (e.key === "ArrowRight") nav(1);
+  });
+</script>
+
+</body>
+</html>
